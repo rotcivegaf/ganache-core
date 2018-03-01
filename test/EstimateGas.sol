@@ -36,6 +36,7 @@ contract EstimateGas {
 
     mapping(bytes32 => uint) index;
     Test[] tests;
+    string field;
 
     function EstimateGas() {
         tests.length++;
@@ -85,5 +86,13 @@ contract EstimateGas {
         tests[pos].balances[posTo] += _value;
 
         return true;
+    }
+
+	function setField(string value) {
+	    // This check will screw gas estimation! Good, good!
+   	    if (msg.gas < 100000) {
+		    throw;
+	    }
+	    field = value;
     }
 }

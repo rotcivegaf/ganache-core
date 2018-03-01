@@ -25,7 +25,11 @@ describe("Gas", function() {
   let estimateGasInstance;
   let deploymentReceipt;
 
-  const provider = Ganache.provider({ mnemonic });
+  const provider = Ganache.provider({
+    mnemonic,
+    estimateGasThreshold: 0
+  });
+
   const web3 = new Web3(provider);
   let accounts = [];
 
@@ -279,6 +283,8 @@ describe("Gas", function() {
       assert.strictEqual(receipt.status, true, "Transaction must succeed");
       assert.strictEqual(receipt.gasUsed, gasEstimate, "gasUsed");
       assert.strictEqual(receipt.cumulativeGasUsed, gasEstimate, "estimate");
+      // assert(receipt.gasUsed <= estimate);
+      // assert(receipt.cumulativeGasUsed <= estimate);
     }
 
     it("matches estimate for deployment", async function() {
@@ -305,6 +311,37 @@ describe("Gas", function() {
         ["0x0123456789012345678901234567890123456789", 5, toBytes("Tim")],
         { from: accounts[0], gas: 3141592 }
       );
+    });
+
+    it("tx executes for funky gas function call (setField)", function () {
+      return estimateGasInstance.methods.setField("Tim")
+        .estimateGas({ from: accounts[0] })
+        .then(function (gas) {
+          return estimateGasInstance.methods.setField("Tim")
+          .send({ from: accounts[0], gas })
+          .then(function (receipt) {
+              assert.equal(receipt.status, 1, 'Transaction must succeed');
+              assert(receipt.gasUsed <= gas );
+              assert(receipt.cumulativeGasUsed <= gas );
+          })
+        });
+    });
+
+    it("estimateGas response should be within threshold for funky gas function call (setField)", function () {
+      return estimateGasInstance.methods.setField("Tim")
+        .estimateGas({ from: accounts[0] })
+        .then(function (gasEstimate) {
+          return estimateGasInstance.methods.setField("Tim")
+            // should fail when subtracting threshold from estimate
+            .send({ from: accounts[0], gas: gasEstimate - 1 })
+            .then(function (receipt) {
+              assert.equal(receipt.status, 0, 'Transaction must fail. estimateGas response not within estimateGasThreshold');
+            })
+            .catch(function (err) {
+              if (err.name === 'RuntimeError' && err.message.includes('revert')) return;
+              throw err;
+            })
+        })
     });
 
     function toBytes(s) {
