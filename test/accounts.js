@@ -44,28 +44,6 @@ describe("Accounts", function() {
         assert.strictEqual(error.message, "signer account is locked");
       }
     });
-
-    /*
-    web3.eth.sendTransaction(
-      {
-        from: expectedAddress,
-        to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-        value: web3.utils.toWei(new BN(1), "ether"),
-        gasLimit: 90000
-      },
-      (err, tx) => {
-        if (!err) {
-          assert.fail("We expected the account to be locked, which should throw an error when sending a transaction");
-        }
-        assert(
-          err.message.toLowerCase().indexOf("could not unlock signer account") >= 0,
-          "Expected error message containing \"could not unlock signer account\" " +
-            "(case insensitive check). Received the following error message, instead. " +
-            `"${err.message}"`
-        );
-      }
-    );
-    */
   });
 
   it("should unlock specified accounts, in conjunction with --secure", async() => {
@@ -101,25 +79,9 @@ describe("Accounts", function() {
         }
       }
     });
-
-    /*
-    web3.eth.sendTransaction(
-      {
-        from: expectedAddress,
-        to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-        value: web3.utils.toWei(new BN(1), "ether"),
-        gasLimit: 90000
-      },
-      function(err, tx) {
-        if (err) {
-          assert.fail(err.message);
-        }
-      }
-    );
-    */
   }).timeout(5000);
 
-  it.only("should unlock specified accounts, in conjunction with --secure, using array indexes", async() => {
+  it("should unlock specified accounts, in conjunction with --secure, using array indexes", async() => {
     const web3 = new Web3();
     const index = 1;
 
