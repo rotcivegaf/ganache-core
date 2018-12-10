@@ -5,7 +5,7 @@ const Ganache = require(process.env.TEST_BUILD
   : "../index.js");
 const assert = require("assert");
 
-describe.only("Accounts", function() {
+describe("Accounts", function() {
   const expectedAddress = "0x604a95C9165Bc95aE016a5299dd7d400dDDBEa9A";
   const mnemonic = "into trim cross then helmet popular suit hammer cart shrug oval student";
 
@@ -21,7 +21,7 @@ describe.only("Accounts", function() {
     assert(accounts[0].toLowerCase(), expectedAddress.toLowerCase());
   }).timeout(5000);
 
-  it.only("should lock all accounts when specified", async function() {
+  it("should lock all accounts when specified", async function() {
     const web3 = new Web3();
     web3.setProvider(
       Ganache.provider({
@@ -35,7 +35,7 @@ describe.only("Accounts", function() {
     accounts.forEach(async(account) => {
       try {
         await web3.eth.sendTransaction({
-          from: expectedAddress,
+          from: account,
           to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
           value: web3.utils.toWei(new BN(1), "ether"),
           gasLimit: 90000
@@ -68,7 +68,7 @@ describe.only("Accounts", function() {
     */
   });
 
-  it("should unlock specified accounts, in conjunction with --secure", () => {
+  it("should unlock specified accounts, in conjunction with --secure", async() => {
     const web3 = new Web3();
     web3.setProvider(
       Ganache.provider({
@@ -78,6 +78,31 @@ describe.only("Accounts", function() {
       })
     );
 
+    const accounts = await web3.eth.getAccounts();
+
+    accounts.forEach(async(account) => {
+      if (account === expectedAddress) {
+        await web3.eth.sendTransaction({
+          from: account,
+          to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
+          value: web3.utils.toWei(new BN(1), "ether"),
+          gasLimit: 90000
+        });
+      } else {
+        try {
+          await web3.eth.sendTransaction({
+            from: account,
+            to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
+            value: web3.utils.toWei(new BN(1), "ether"),
+            gasLimit: 90000
+          });
+        } catch (error) {
+          assert.strictEqual(error.message, "signer account is locked");
+        }
+      }
+    });
+
+    /*
     web3.eth.sendTransaction(
       {
         from: expectedAddress,
@@ -91,18 +116,46 @@ describe.only("Accounts", function() {
         }
       }
     );
+    */
   }).timeout(5000);
 
-  it("should unlock specified accounts, in conjunction with --secure, using array indexes", () => {
+  it.only("should unlock specified accounts, in conjunction with --secure, using array indexes", async() => {
     const web3 = new Web3();
+    const index = 1;
+
     web3.setProvider(
       Ganache.provider({
         mnemonic: mnemonic,
         secure: true,
-        unlocked_accounts: [0]
+        unlocked_accounts: [index]
       })
     );
 
+    const accounts = await web3.eth.getAccounts();
+
+    accounts.forEach(async(account) => {
+      if (account === accounts[index]) {
+        await web3.eth.sendTransaction({
+          from: account,
+          to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
+          value: web3.utils.toWei(new BN(1), "ether"),
+          gasLimit: 90000
+        });
+      } else {
+        try {
+          await web3.eth.sendTransaction({
+            from: account,
+            to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
+            value: web3.utils.toWei(new BN(1), "ether"),
+            gasLimit: 90000
+          });
+        } catch (error) {
+          assert.strictEqual(error.message, "signer account is locked");
+        }
+      }
+    });
+
+    /*
     web3.eth.sendTransaction(
       {
         from: expectedAddress,
@@ -116,6 +169,7 @@ describe.only("Accounts", function() {
         }
       }
     );
+    */
   });
 
   it("should unlock accounts even if private key isn't managed by the testrpc (impersonation)", async() => {
