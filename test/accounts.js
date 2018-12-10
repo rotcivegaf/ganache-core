@@ -21,7 +21,7 @@ describe.only("Accounts", function() {
     assert(accounts[0].toLowerCase(), expectedAddress.toLowerCase());
   }).timeout(5000);
 
-  it("should lock all accounts when specified", function() {
+  it.only("should lock all accounts when specified", async function() {
     const web3 = new Web3();
     web3.setProvider(
       Ganache.provider({
@@ -30,6 +30,22 @@ describe.only("Accounts", function() {
       })
     );
 
+    const accounts = await web3.eth.getAccounts();
+
+    accounts.forEach(async(account) => {
+      try {
+        await web3.eth.sendTransaction({
+          from: expectedAddress,
+          to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
+          value: web3.utils.toWei(new BN(1), "ether"),
+          gasLimit: 90000
+        });
+      } catch (error) {
+        assert.strictEqual(error.message, "signer account is locked");
+      }
+    });
+
+    /*
     web3.eth.sendTransaction(
       {
         from: expectedAddress,
@@ -49,10 +65,11 @@ describe.only("Accounts", function() {
         );
       }
     );
+    */
   });
 
   it("should unlock specified accounts, in conjunction with --secure", () => {
-    var web3 = new Web3();
+    const web3 = new Web3();
     web3.setProvider(
       Ganache.provider({
         mnemonic: mnemonic,
