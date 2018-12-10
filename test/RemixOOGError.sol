@@ -15,5 +15,11 @@ contract Send {
             receiver[i].transfer(amount);
         }
         return true;
+    }
+
+    function something() public payable returns(bool){
+        address[] addresses;
+        addresses.push(msg.sender);
+        return transfer(addresses, 1);
     }   
 }

@@ -52,10 +52,18 @@ describe("Remix OOG Error", function() {
   describe("Gas Estimates", function() {
     it.only("estimates stufffff and processes thingsss", async() => {
       const from = accounts[0];
-      const method = await estimateGasInstance.methods
-        .transfer([accounts[1], accounts[2], accounts[3]], 1000)
-        .send({ from });
+      const method = await estimateGasInstance.methods.something().send({ from, gas: 200000 });
       console.log(method);
+
+      let result = await web3.eth.getBlock("latest", false);
+      console.log(result);
+      //   console.log(estimateGasInstance.methods.transfer);
+
+      //   let stuff = await estimateGasInstance.methods.transfer(
+      //     [accounts[1], accounts[2], accounts[3]],
+      //     1000
+      //   )
+      //     .estimateGas({ from, gas: 200000 });
     });
   });
 });
