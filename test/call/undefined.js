@@ -4,6 +4,7 @@ const Ganache = require("../../index.js");
 const path = require("path");
 
 const { compileAndDeploy } = require("../helpers/contracts");
+// const { preloadContracts } = require("./helpers/pretest_setup");
 
 const mnemonic = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 

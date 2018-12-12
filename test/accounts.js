@@ -116,22 +116,6 @@ describe("Accounts", function() {
         }
       }
     });
-
-    /*
-    web3.eth.sendTransaction(
-      {
-        from: expectedAddress,
-        to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-        value: web3.utils.toWei(new BN(1), "ether"),
-        gasLimit: 90000
-      },
-      function(err, tx) {
-        if (err) {
-          assert.fail(err.message);
-        }
-      }
-    );
-    */
   });
 
   it("should unlock accounts even if private key isn't managed by the testrpc (impersonation)", async() => {
