@@ -6,7 +6,7 @@ const Ganache = require(process.env.TEST_BUILD
 const assert = require("assert");
 
 describe("Accounts", function() {
-  const expectedAddress = "0x604a95C9165Bc95aE016a5299dd7d400dDDBEa9A";
+  const expectedAddress = "0x604a95c9165bc95ae016a5299dd7d400dddbea9a";
   const mnemonic = "into trim cross then helmet popular suit hammer cart shrug oval student";
 
   it("should respect the BIP99 mnemonic", async() => {
@@ -18,7 +18,7 @@ describe("Accounts", function() {
     );
 
     const accounts = await web3.eth.getAccounts();
-    assert(accounts[0].toLowerCase(), expectedAddress.toLowerCase());
+    assert(accounts[0], expectedAddress);
   }).timeout(5000);
 
   it("should lock all accounts when specified", async function() {
