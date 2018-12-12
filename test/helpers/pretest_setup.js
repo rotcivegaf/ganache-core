@@ -1,5 +1,7 @@
 const Web3 = require("web3");
-const Ganache = require("../../index");
+const Ganache = require(process.env.TEST_BUILD
+  ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
+  : "../index.js");
 const { join } = require("path");
 const { compileAndDeploy } = require("./compile_deploy");
 
