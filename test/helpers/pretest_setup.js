@@ -5,7 +5,12 @@ const Ganache = require(process.env.TEST_BUILD
 const { join } = require("path");
 const { compileAndDeploy } = require("./compile_deploy");
 
-const preloadContracts = (mainContractName = "", subContractNames = [], options, contractPath = "../contracts/") => {
+const preloadContracts = (
+  mainContractName = "",
+  subContractNames = [],
+  options = {},
+  contractPath = "../contracts/"
+) => {
   const context = {};
 
   before("Setting up web3 and contract", async function() {
@@ -21,32 +26,34 @@ const preloadContracts = (mainContractName = "", subContractNames = [], options,
       web3
     );
 
-    context.abi = abi;
-    context.accounts = accounts;
-    context.bytecode = bytecode;
-    context.contract = contract;
-    context.instance = instance;
-    context.provider = provider;
-    context.sources = sources;
-    context.web3 = web3;
+    Object.assign(context, {
+      abi,
+      accounts,
+      bytecode,
+      contract,
+      instance,
+      provider,
+      sources,
+      web3
+    });
   });
 
   return context;
 };
 
-const preloadWeb3 = (mnemonics) => {
+const preloadWeb3 = (options = {}) => {
   const context = {};
 
   before("Setting up web3", async function() {
-    this.timeout(10000);
-
-    const options = typeof mnemonics === "string" ? {} : { mnemonics };
     const provider = Ganache.provider(options);
     const web3 = new Web3(provider);
+    const accounts = await web3.eth.getAccounts();
 
-    context.provider = provider;
-    context.options = options;
-    context.web3 = web3;
+    Object.assign(context, {
+      accounts,
+      provider,
+      web3
+    });
   });
 
   return context;
