@@ -1,5 +1,5 @@
 const assert = require("assert");
-const pify = require("pify");
+const { pify } = require("./helpers/utils");
 
 const Ganache = require("../index.js");
 const StateManager = require("../lib/statemanager.js");

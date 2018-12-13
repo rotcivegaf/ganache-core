@@ -7,10 +7,9 @@ const fs = require("fs");
 const path = require("path");
 const solc = require("solc");
 const to = require("../lib/utils/to.js");
-const pify = require("pify");
 const RSCLEAR_REFUND = 15000;
 const RSELFDESTRUCT_REFUND = 24000;
-const { sleep } = require("./helpers/utils");
+const { sleep, pify } = require("./helpers/utils");
 
 // Thanks solc. At least this works!
 // This removes solc's overzealous uncaughtException event handler.

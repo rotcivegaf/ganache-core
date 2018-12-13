@@ -1,28 +1,28 @@
-var BN = require("bn.js");
-var Web3 = require("web3");
-var Ganache = require(process.env.TEST_BUILD
+const Ganache = require(process.env.TEST_BUILD
   ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
   : "../index.js");
-var assert = require("assert");
-var to = require("../lib/utils/to.js");
-var solc = require("solc");
-var pify = require("pify");
+const { pify } = require("./helpers/utils");
+const to = require("../lib/utils/to.js");
+const assert = require("assert");
+const solc = require("solc");
+const Web3 = require("web3");
+const BN = require("bn.js");
 
 // Thanks solc. At least this works!
 // This removes solc's overzealous uncaughtException event handler.
 process.removeAllListeners("uncaughtException");
 
 describe("Mining", function() {
-  var web3 = new Web3(
+  const web3 = new Web3(
     Ganache.provider({
       vmErrorsOnRPCResponse: true
       // logger: console,
     })
   );
-  var accounts;
-  var snapshotId;
-  var badBytecode;
-  var goodBytecode;
+  let accounts;
+  let snapshotId;
+  let badBytecode;
+  let goodBytecode;
 
   before("compile solidity code that causes runtime errors", async function() {
     this.timeout(10000);

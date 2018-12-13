@@ -12,7 +12,7 @@ const solc = require("solc");
 const fs = require("fs");
 const to = require("../lib/utils/to");
 const _ = require("lodash");
-const pify = require("pify");
+const { pify } = require("./helpers/utils");
 
 const source = fs.readFileSync("./test/Example.sol", { encoding: "utf8" });
 const compilationResult = solc.compile(source, 1);

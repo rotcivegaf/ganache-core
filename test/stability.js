@@ -6,7 +6,7 @@ var Ganache = require(process.env.TEST_BUILD
   ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
   : "../index.js");
 var utils = require("ethereumjs-util");
-var pify = require("pify");
+const { pify } = require("./helpers/utils");
 
 var regex = matchers.regex;
 
