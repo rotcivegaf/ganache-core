@@ -57,7 +57,7 @@ function setUp(options = { mnemonic }, contractName = "BlockGasLimit") {
   return context;
 }
 
-describe("Specifying a sender gas limit greater than block gas limitations", function() {
+describe.skip("Specifying a sender gas limit greater than block gas limitations", function() {
   const context = setUp();
   const iterations = 10 ** 6;
   const clientGasLimit = 10 ** 8;
