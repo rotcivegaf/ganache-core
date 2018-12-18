@@ -5,7 +5,7 @@ var Ganache = require(process.env.TEST_BUILD
   : "../index.js");
 var assert = require("assert");
 
-describe("Accounts", function() {
+describe.only("Accounts", function() {
   var expectedAddress = "0x604a95C9165Bc95aE016a5299dd7d400dDDBEa9A";
   var mnemonic = "into trim cross then helmet popular suit hammer cart shrug oval student";
 
@@ -114,7 +114,7 @@ describe("Accounts", function() {
     );
   });
 
-  it("should unlock accounts even if private key isn't managed by the testrpc (impersonation)", function() {
+  it.only("should unlock accounts even if private key isn't managed by the testrpc (impersonation)", function() {
     var secondAddress = "0x1234567890123456789012345678901234567890";
 
     var web3 = new Web3();
