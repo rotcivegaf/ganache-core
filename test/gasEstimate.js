@@ -95,8 +95,8 @@ describe.only("Gas Estimates", function() {
           data: "0xad501467",
           value: "0x0",
           // data: "0xad50146714610046575b600080fd5b34801561005257600080fd5b5061005b61005d565b",
-          // gas: Math.ceil((64202 - 21000)/64 + 64202)
-          gas: 64202
+          // gas: 64202 - Math.ceil((64202 - 21000)/64)
+          // gas: 64202 + 124
         }
       };
       // const encodedString = await web3.eth.abi.encodeFunctionSignature("createInstance()");
@@ -118,7 +118,7 @@ describe.only("Gas Estimates", function() {
       // let gasEstimate = await web3.eth.estimateGas(txData);
       // console.log(gasEstimate);
       let gasEstimate = await web3.eth.estimateGas(txData2);
-      console.log("Hello " + gasEstimate);
+      console.log("Hello" + gasEstimate);
 
       method = "eth_sendTransaction";
       params = [txData2];
