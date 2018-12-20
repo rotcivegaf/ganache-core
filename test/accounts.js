@@ -1,11 +1,11 @@
-const BN = require("bn.js");
+// const BN = require("bn.js");
 const Web3 = require("web3");
 const Ganache = require(process.env.TEST_BUILD
   ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
   : "../index.js");
 const assert = require("assert");
 
-describe("Accounts", function() {
+describe("Accounts", async() => {
   const expectedAddress = "0x604a95c9165bc95ae016a5299dd7d400dddbea9a";
   const mnemonic = "into trim cross then helmet popular suit hammer cart shrug oval student";
 
@@ -18,10 +18,10 @@ describe("Accounts", function() {
     );
 
     const accounts = await web3.eth.getAccounts();
-    assert(accounts[0], expectedAddress);
+    assert.strictEqual(accounts[0].toLowerCase(), expectedAddress);
   }).timeout(5000);
 
-  it("should lock all accounts when specified", async function() {
+  it("should lock all accounts when specified", async() => {
     const web3 = new Web3();
     web3.setProvider(
       Ganache.provider({
@@ -37,7 +37,7 @@ describe("Accounts", function() {
         await web3.eth.sendTransaction({
           from: account,
           to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-          value: web3.utils.toWei(new BN(1), "ether"),
+          value: web3.utils.toWei("1", "ether"),
           gasLimit: 90000
         });
       } catch (error) {
@@ -63,7 +63,7 @@ describe("Accounts", function() {
         await web3.eth.sendTransaction({
           from: account,
           to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-          value: web3.utils.toWei(new BN(1), "ether"),
+          value: web3.utils.toWei("1", "ether"),
           gasLimit: 90000
         });
       } else {
@@ -71,7 +71,7 @@ describe("Accounts", function() {
           await web3.eth.sendTransaction({
             from: account,
             to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-            value: web3.utils.toWei(new BN(1), "ether"),
+            value: web3.utils.toWei("1", "ether"),
             gasLimit: 90000
           });
         } catch (error) {
@@ -100,7 +100,7 @@ describe("Accounts", function() {
         await web3.eth.sendTransaction({
           from: account,
           to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-          value: web3.utils.toWei(new BN(1), "ether"),
+          value: web3.utils.toWei("1", "ether"),
           gasLimit: 90000
         });
       } else {
@@ -108,7 +108,7 @@ describe("Accounts", function() {
           await web3.eth.sendTransaction({
             from: account,
             to: "0x1234567890123456789012345678901234567890", // doesn't need to exist
-            value: web3.utils.toWei(new BN(1), "ether"),
+            value: web3.utils.toWei("1", "ether"),
             gasLimit: 90000
           });
         } catch (error) {
@@ -134,7 +134,7 @@ describe("Accounts", function() {
     await web3.eth.sendTransaction({
       from: expectedAddress,
       to: secondAddress,
-      value: web3.utils.toWei(new BN(10), "ether"),
+      value: web3.utils.toWei("10", "ether"),
       gasLimit: 90000
     });
 
@@ -142,13 +142,13 @@ describe("Accounts", function() {
     await web3.eth.sendTransaction({
       from: secondAddress,
       to: expectedAddress,
-      value: web3.utils.toWei(new BN(5), "ether"),
+      value: web3.utils.toWei("5", "ether"),
       gasLimit: 90000
     });
 
     // And for the heck of it let's check the balance just to make sure it went through
     const balance = await web3.eth.getBalance(secondAddress);
-    let balanceInEther = await web3.utils.fromWei(new BN(balance), "ether");
+    let balanceInEther = await web3.utils.fromWei(balance, "ether");
 
     if (typeof balanceInEther === "string") {
       balanceInEther = parseFloat(balanceInEther);
@@ -190,7 +190,7 @@ describe("Accounts", function() {
     );
 
     const accounts = await web3.eth.getAccounts();
-    assert(accounts.length, 2, "The number of accounts created should be 2");
+    assert.strictEqual(accounts.length, 2, "The number of accounts created should be 2");
   }).timeout(5000);
 
   it("should create a 7 accounts when ", async() => {
@@ -202,7 +202,7 @@ describe("Accounts", function() {
     );
 
     const accounts = await web3.eth.getAccounts();
-    assert(accounts.length, 7, "The number of accounts created should be 7");
+    assert.strictEqual(accounts.length, 7, "The number of accounts created should be 7");
   }).timeout(5000);
 
   it("should respect the default_balance_ether option", async() => {
