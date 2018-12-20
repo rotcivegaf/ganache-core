@@ -1,9 +1,9 @@
-const pify = require("pify");
+// const pify = require("pify");
 const Web3 = require("web3");
 const Ganache = require("../index");
-const assert = require("assert");
-const fs = require("fs");
-const solc = require("solc");
+// const assert = require("assert");
+// const fs = require("fs");
+// const solc = require("solc");
 // const { preloadContracts } = require("./helpers/pretest_setup");
 const { send } = require("./helpers/rpc");
 
@@ -38,10 +38,10 @@ describe.only("Gas Estimates", function() {
       // const { accounts, web3 } = services;
       const provider = Ganache.provider();
       const web3 = new Web3(provider);
-       
+
       const accounts = await web3.eth.getAccounts();
 
-      const contractAddress = "0xa3d1b6e8d21bd3e23cdbeb3aac3f494b97704411";
+      // const contractAddress = "0xa3d1b6e8d21bd3e23cdbeb3aac3f494b97704411";
       // const source = fs.readFileSync("./test/contracts/ContractFactory.sol", { encoding: "utf8" });
       // Note: Certain properties of the following contract data are hardcoded to
       // maintain repeatable tests. If you significantly change the solidity code,
@@ -66,7 +66,9 @@ describe.only("Gas Estimates", function() {
           // to: null, // set by test
           // sets data to 25 (base 10)
           // data: "0xad5014670000000000000000000000000000000000000000000000000000000000000000",
-          data: "0x608060405234801561001057600080fd5b50610116806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063ad50146714610046575b600080fd5b34801561005257600080fd5b5061005b61005d565b005b6000610067610089565b604051809103906000f080158015610083573d6000803e3d6000fd5b50905050565b6040516052806100998339019056006080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820bfb4cf4f0195ccf04ba6008c65388178bcb969ad714f33e21eacd4212afb57d80029a165627a7a723058200cc13b8ec52a5d1687899662b9bc6cfbf28d32b8f918f391f249bd695189fe5e0029",
+          data:
+            // eslint-disable-next-line
+            "0x608060405234801561001057600080fd5b50610116806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063ad50146714610046575b600080fd5b34801561005257600080fd5b5061005b61005d565b005b6000610067610089565b604051809103906000f080158015610083573d6000803e3d6000fd5b50905050565b6040516052806100998339019056006080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820bfb4cf4f0195ccf04ba6008c65388178bcb969ad714f33e21eacd4212afb57d80029a165627a7a723058200cc13b8ec52a5d1687899662b9bc6cfbf28d32b8f918f391f249bd695189fe5e0029",
           value: "0x0",
           // data: "0xad50146714610046575b600080fd5b34801561005257600080fd5b5061005b61005d565b",
           gas: 125881
@@ -96,7 +98,7 @@ describe.only("Gas Estimates", function() {
           value: "0x0",
           // data: "0xad50146714610046575b600080fd5b34801561005257600080fd5b5061005b61005d565b",
           // gas: 64202 - Math.ceil((64202 - 21000)/64)
-          // gas: 64202 + 124
+          gas: 64202
         }
       };
       // const encodedString = await web3.eth.abi.encodeFunctionSignature("createInstance()");
@@ -118,7 +120,7 @@ describe.only("Gas Estimates", function() {
       // let gasEstimate = await web3.eth.estimateGas(txData);
       // console.log(gasEstimate);
       let gasEstimate = await web3.eth.estimateGas(txData2);
-      console.log("Hello" + gasEstimate);
+      console.log("Gas Estimate: " + gasEstimate);
 
       method = "eth_sendTransaction";
       params = [txData2];
