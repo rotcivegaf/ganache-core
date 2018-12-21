@@ -3,12 +3,12 @@ const Ganache = require(process.env.TEST_BUILD
   ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
   : "../index.js");
 const assert = require("assert");
-const { preloadWeb3 } = require("./helpers/pretest_setup");
+const { preloadWeb3 } = require("./helpers/preloadWeb3");
 const { send } = require("./helpers/rpc");
 
 describe("Bad inputs", () => {
-  describe("Provider:", () => {
-    const services = preloadWeb3();
+  describe("Provider:", async() => {
+    const services = await preloadWeb3();
 
     it("recovers after 'to' address that isn't a string", async() => {
       const { accounts, web3 } = services;

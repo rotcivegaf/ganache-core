@@ -14,7 +14,7 @@ const to = require("../lib/utils/to");
 const _ = require("lodash");
 const pify = require("pify");
 
-const source = fs.readFileSync("./test/Example.sol", { encoding: "utf8" });
+const source = fs.readFileSync("./test/contracts/examples/Example.sol", { encoding: "utf8" });
 const compilationResult = solc.compile(source, 1);
 const secretKeys = [
   "0xda09f8cdec20b7c8334ce05b27e6797bef01c1ad79c59381666467552c5012e3",
@@ -699,6 +699,34 @@ const tests = function(web3) {
       await web3.eth.sendSignedTransaction(transaction.serialize());
       const balanceEnd = new BN(await web3.eth.getBalance(accounts[5]));
       assert(balanceStart.sub(new BN(1)).eq(balanceEnd));
+    });
+  });
+
+  describe("eth_newFilter", function() {
+    it("creates a new filter and returns the correctly formatted result", function(done) {
+      var provider = web3.currentProvider;
+
+      provider.send(
+        {
+          jsonrpc: "2.0",
+          method: "eth_newFilter",
+          params: [
+            {
+              fromBlock: "0x0",
+              address: accounts[0],
+              topics: []
+            }
+          ],
+          id: new Date().getTime()
+        },
+        function(err, result) {
+          if (err) {
+            return done(err);
+          }
+          assert.strictEqual(result.result, "0x1");
+          done();
+        }
+      );
     });
   });
 

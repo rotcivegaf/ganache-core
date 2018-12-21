@@ -1,29 +1,16 @@
 const assert = require("assert");
-const { preloadContracts } = require("../helpers/pretest_setup");
+const { setUp } = require("../helpers/pretestSetup");
 
-describe("Call", () => {
-  const mainContract = "Call"; // Name of the parent contract
+describe("Undefined", () => {
+  describe("Calls", () => {
+    const mainContract = "Call";
+    const contractFilenames = [];
+    const contractPath = "../contracts/call/";
+    const options = {
+      vmErrorsOnRPCResponse: false
+    };
 
-  // List of all contract files to compile and deploy
-  const subContractFilenames = ["Call"];
-
-  const providerOptions = {
-    vmErrorsOnRPCResponse: false
-  };
-
-  describe("undefined", () => {
-    /**
-     * Enable access to:
-     * abi - abi
-     * accounts - randomly generated test accounts
-     * bytecode - contract bytecode
-     * contract - contract interface object
-     * instance - contract instance on the blockchain
-     * provider - Ganache (Geth and Parity coming soon)
-     * sources - raw contract files
-     * web3 - web3 interface
-     */
-    const services = preloadContracts(mainContract, subContractFilenames, providerOptions);
+    const services = setUp(mainContract, contractFilenames, options, contractPath);
 
     it("should return `0x` when eth_call fails (web3.eth call)", async() => {
       const { instance, web3 } = services;
@@ -40,8 +27,6 @@ describe("Call", () => {
 
     it("should throw due to returned value of `0x` when eth_call fails (compiled contract call)", async() => {
       const { instance } = services;
-      // running this test with callback style because I couldn't get `assert.throws`
-      // to work with async/await (in node 10.0.0 this is handled by `assert.rejects`)
       try {
         await instance.methods.causeReturnValueOfUndefined().call();
       } catch (error) {
