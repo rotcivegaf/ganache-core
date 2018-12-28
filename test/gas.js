@@ -65,8 +65,8 @@ describe("Gas", function() {
     return contract.deploy({ data: estimateGasContractData }).send({ from: accounts[0], gas: 3141592 });
   }
 
-  describe("Refunds", function() {
-    it("accounts for Rsclear Refund in gasEstimate", async() => {
+  describe.only("Refunds", function() {
+    it.only("accounts for Rsclear Refund in gasEstimate", async() => {
       const from = accounts[0];
       const options = { from, gas: 5000000 };
 
