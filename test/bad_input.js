@@ -1,173 +1,57 @@
-const Web3 = require("web3");
-const Ganache = require(process.env.TEST_BUILD
+var Web3 = require("web3");
+var Ganache = require(process.env.TEST_BUILD
   ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
   : "../index.js");
-const assert = require("assert");
-const { preloadWeb3 } = require("./helpers/preloadWeb3");
-const { send } = require("./helpers/rpc");
+var assert = require("assert-match");
+var regex = require("assert-match/matchers").regex;
 
-describe("Bad inputs", () => {
-  describe("Provider:", async() => {
-    const services = await preloadWeb3();
+const tests = (web3) => {
+  let accounts;
 
-    it("recovers after 'to' address that isn't a string", async() => {
-      const { accounts, web3 } = services;
-      const iterations = 5;
+  describe("bad input", () => {
+    before(async() => {
+      accounts = await web3.eth.getAccounts();
+    });
 
-      const method = "eth_sendTransaction";
-      const params = [
+    it("recovers after to address that isn't a string", () => {
+      let provider = web3.currentProvider;
+
+      provider.send(
         {
-          value: "0x0",
-          gas: "0xf4240",
-          from: accounts[0],
-          // Buffers have been sent in the past
-          to: {
-            type: "Buffer",
-            data: [
-              // ...
-            ]
-          },
-          data: "0xe1fa8e84666f6f0000000000000000000000000000000000000000000000000000000000"
-        }
-      ];
-
-      for (let i = 0; i < iterations; i++) {
-        try {
-          await send(method, params, web3);
-        } catch (error) {
-          assert.strictEqual(error.message, "Invalid to address");
-        }
-      }
-    });
-
-    it("recovers after bad nonce (too high)", async() => {
-      const { accounts, web3 } = services;
-      const method = "eth_sendTransaction";
-      const params = [
-        {
-          value: "0x10000000",
-          gas: "0xf4240",
-          from: accounts[0],
-          to: accounts[1],
-          nonce: "0xffffffff" // too big nonce
-        }
-      ];
-
-      try {
-        await send(method, params, web3);
-      } catch (error) {
-        // We're supposed to get an error the first time. Let's assert we get the right one.
-        // Note that if using the Ganache as a provider, err will be non-null when there's
-        // an error. However, when using it as a server it won't be. In both cases, however,
-        // result.error should be set with the same error message. We'll check for that.
-        assert(
-          error.message.indexOf(
-            "the tx doesn't have the correct nonce. account has nonce of: 0 tx has nonce of: 4294967295"
-          ) >= 0
-        );
-      }
-
-      delete params[0].nonce;
-      await send(method, params, web3);
-    });
-
-    it("recovers after bad nonce (too low)", async() => {
-      const { accounts, web3 } = services;
-      const method = "eth_sendTransaction";
-      const params = [
-        {
-          value: "0x10000000",
-          gas: "0xf4240",
-          from: accounts[0],
-          to: accounts[1],
-          nonce: "0x0" // too low nonce
-        }
-      ];
-
-      try {
-        await send(method, params, web3);
-      } catch (error) {
-        assert(
-          /the tx doesn't have the correct nonce. account has nonce of: 1 tx has nonce of: 0/.test(error.message),
-          `Expected incorrect nonce error, got '${error.message}', instead.`
-        );
-      }
-
-      delete params[0].nonce;
-      await send(method, params, web3);
-    });
-
-    it("recovers after bad balance", async() => {
-      const { accounts, web3 } = services;
-      const method = "eth_sendTransaction";
-      const params = [{ value: "0x1000000000000000000000000000", gas: "0xf4240", from: accounts[0], to: accounts[1] }];
-
-      try {
-        await send(method, params, web3);
-      } catch (error) {
-        const regExpr = /sender doesn't have enough funds to send tx. The upfront cost is: \d+ and the sender's account only has: \d+/;
-        assert(regExpr.test(error.message), `Unexpected error message. Got ${error.message}.`);
-      }
-
-      params[0].value = "0x5";
-      await send(method, params, web3);
-    });
-  });
-
-  describe.skip("Server:", () => {
-    const services = preloadWeb3();
-    let server;
-
-    before("Initialize Ganache server", (done) => {
-      const { web3 } = services;
-      const port = 12345;
-
-      server = Ganache.server({});
-      server.listen(port, function() {
-        web3.setProvider(new Web3.providers.HttpProvider(`http://localhost:"${port}`));
-        done();
-      });
-    });
-
-    after("Shutdown server", () => {
-      server.close();
-    });
-
-    describe("bad input", () => {
-      it("recovers after 'to' address that isn't a string", async() => {
-        const { accounts, web3 } = services;
-        const iterations = 5;
-
-        const method = "eth_sendTransaction";
-        const params = [
-          {
-            value: "0x0",
-            gas: "0xf4240",
-            from: accounts[0],
-            // Buffers have been sent in the past
-            to: {
-              type: "Buffer",
-              data: [
-                // ...
-              ]
-            },
-            data: "0xe1fa8e84666f6f0000000000000000000000000000000000000000000000000000000000"
-          }
-        ];
-
-        for (let i = 0; i < iterations; i++) {
+          id: 2,
+          jsonrpc: "2.0",
+          method: "eth_sendTransaction",
+          params: [
+            {
+              value: "0x0",
+              gas: "0xf4240",
+              from: accounts[0],
+              to: {
+                type: "Buffer", // Buffers have been sent in the past
+                data: [
+                  /* ... */
+                ]
+              },
+              data: "0xe1fa8e84666f6f0000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        async() => {
+          // Ignore any errors, but make sure we can make the second request
           try {
-            await send(method, params, web3);
-          } catch (error) {
-            assert.strictEqual(error.message, "Invalid to address");
-          }
+            await web3.eth.getAccounts();
+          } catch (error) {}
         }
-      });
+      );
+    });
 
-      it("recovers after bad nonce (too high)", async() => {
-        const { accounts, web3 } = services;
-        const method = "eth_sendTransaction";
-        const params = [
+    it("recovers after bad nonce (too high)", function(done) {
+      var provider = web3.currentProvider;
+
+      var request = {
+        jsonrpc: "2.0",
+        method: "eth_sendTransaction",
+        params: [
           {
             value: "0x10000000",
             gas: "0xf4240",
@@ -175,30 +59,40 @@ describe("Bad inputs", () => {
             to: accounts[1],
             nonce: "0xffffffff" // too big nonce
           }
-        ];
+        ],
+        id: 2
+      };
 
-        try {
-          await send(method, params, web3);
-        } catch (error) {
-          // We're supposed to get an error the first time. Let's assert we get the right one.
-          // Note that if using the Ganache as a provider, err will be non-null when there's
-          // an error. However, when using it as a server it won't be. In both cases, however,
-          // result.error should be set with the same error message. We'll check for that.
+      provider.send(request, function(err, result) {
+        if (err) {
           assert(
-            error.message.indexOf(
+            err.message.indexOf(
               "the tx doesn't have the correct nonce. account has nonce of: 0 tx has nonce of: 4294967295"
             ) >= 0
           );
         }
+        // We're supposed to get an error the first time. Let's assert we get the right one.
+        // Note that if using the Ganache as a provider, err will be non-null when there's
+        // an error. However, when using it as a server it won't be. In both cases, however,
+        // result.error should be set with the same error message. We'll check for that.
+        assert(
+          result.error.message.indexOf(
+            "the tx doesn't have the correct nonce. account has nonce of: 0 tx has nonce of: 4294967295"
+          ) >= 0
+        );
 
-        delete params[0].nonce;
-        await send(method, params, web3);
+        delete request.params[0].nonce;
+        provider.send(request, done);
       });
+    });
 
-      it("recovers after bad nonce (too low)", async() => {
-        const { accounts, web3 } = services;
-        const method = "eth_sendTransaction";
-        const params = [
+    it("recovers after bad nonce (too low)", function(done) {
+      var provider = web3.currentProvider;
+
+      var request = {
+        jsonrpc: "2.0",
+        method: "eth_sendTransaction",
+        params: [
           {
             value: "0x10000000",
             gas: "0xf4240",
@@ -206,43 +100,103 @@ describe("Bad inputs", () => {
             to: accounts[1],
             nonce: "0x0" // too low nonce
           }
-        ];
+        ],
+        id: 2
+      };
 
-        try {
-          await send(method, params, web3);
-        } catch (error) {
+      provider.send(request, function(err, result) {
+        if (err) {
           assert(
-            /the tx doesn't have the correct nonce. account has nonce of: 1 tx has nonce of: 0/.test(error.message),
-            `Expected incorrect nonce error, got '${error.message}', instead.`
+            /the tx doesn't have the correct nonce. account has nonce of: 1 tx has nonce of: 0/.test(err.message),
+            `Expected incorrect nonce error, got '${err.message}', instead.`
           );
         }
+        // We're supposed to get an error the first time. Let's assert we get the right one.
+        // Note that if using the Ganache as a provider, err will be non-null when there's
+        // an error. However, when using it as a server it won't be. In both cases, however,
+        // result.error should be set with the same error message. We'll check for that.
+        assert(
+          /the tx doesn't have the correct nonce. account has nonce of: 1 tx has nonce of: 0/.test(
+            result.error.message
+          ),
+          `Expected incorrect nonce error, got '${result.error.message}', instead.`
+        );
 
-        delete params[0].nonce;
-        await send(method, params, web3);
+        delete request.params[0].nonce;
+        provider.send(request, done);
       });
+    });
 
-      it("recovers after bad balance", async() => {
-        const { accounts, web3 } = services;
-        const method = "eth_sendTransaction";
-        const params = [
-          {
-            value: "0x1000000000000000000000000000",
-            gas: "0xf4240",
-            from: accounts[0],
-            to: accounts[1]
+    it("recovers after bad balance", function(done) {
+      web3.eth.getBalance(accounts[0], function(_, balance) {
+        var provider = web3.currentProvider;
+
+        var request = {
+          jsonrpc: "2.0",
+          method: "eth_sendTransaction",
+          params: [
+            {
+              value: "0x1000000000000000000000000000",
+              gas: "0xf4240",
+              from: accounts[0],
+              to: accounts[1]
+            }
+          ],
+          id: 2
+        };
+
+        provider.send(request, function(err, result) {
+          if (err) {
+            assert.deepEqual(
+              err.message,
+              regex(
+                /sender doesn't have enough funds to send tx. The upfront cost is: \d+ and the sender's account only has: \d+/
+              ),
+              `Unexpected error message. Got ${err.message}.`
+            );
           }
-        ];
+          // We're supposed to get an error the first time. Let's assert we get the right one.
+          // Note that if using the Ganache as a provider, err will be non-null when there's
+          // an error. However, when using it as a server it won't be. In both cases, however,
+          // result.error should be set with the same error message. We'll check for that.
+          assert.deepEqual(
+            result.error.message,
+            regex(
+              /sender doesn't have enough funds to send tx. The upfront cost is: \d+ and the sender's account only has: \d+/
+            ),
+            `Unexpected error message. Got ${result.error.message}.`
+          );
 
-        try {
-          await send(method, params, web3);
-        } catch (error) {
-          const regExpr = /sender doesn't have enough funds to send tx. The upfront cost is: \d+ and the sender's account only has: \d+/;
-          assert(regExpr.test(error.message), `Unexpected error message. Got ${error.message}.`);
-        }
-
-        params[0].value = "0x5";
-        await send(method, params, web3);
+          request.params[0].value = "0x5";
+          provider.send(request, done);
+        });
       });
     });
   });
+};
+
+describe("Provider:", function() {
+  var web3 = new Web3();
+  web3.setProvider(Ganache.provider({}));
+  tests(web3);
+});
+
+describe("Server:", function(done) {
+  var web3 = new Web3();
+  var port = 12345;
+  var server;
+
+  before("Initialize Ganache server", function(done) {
+    server = Ganache.server({});
+    server.listen(port, function() {
+      web3.setProvider(new Web3.providers.HttpProvider("http://localhost:" + port));
+      done();
+    });
+  });
+
+  after("Shutdown server", function(done) {
+    server.close(done);
+  });
+
+  tests(web3);
 });
