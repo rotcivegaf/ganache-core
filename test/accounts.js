@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { preloadWeb3 } = require("./helpers/preloadWeb3");
+const { getWeb3 } = require("./helpers/getWeb3");
 
 describe("Accounts", async() => {
   const expectedAddress = "0x604a95c9165bc95ae016a5299dd7d400dddbea9a";
@@ -8,7 +8,7 @@ describe("Accounts", async() => {
 
   it("should respect the BIP99 mnemonic", async() => {
     const options = { mnemonic };
-    const { accounts } = await preloadWeb3(options);
+    const { accounts } = await getWeb3(options);
 
     assert.strictEqual(accounts[0].toLowerCase(), expectedAddress);
   });
@@ -18,7 +18,7 @@ describe("Accounts", async() => {
       mnemonic: mnemonic,
       secure: true
     };
-    const { accounts, web3 } = await preloadWeb3(options);
+    const { accounts, web3 } = await getWeb3(options);
 
     accounts.forEach(async(account) => {
       try {
@@ -42,7 +42,7 @@ describe("Accounts", async() => {
       unlocked_accounts: [expectedAddress]
     };
 
-    const { accounts, web3 } = await preloadWeb3(options);
+    const { accounts, web3 } = await getWeb3(options);
 
     accounts.forEach(async(account) => {
       if (account.toLowerCase() === expectedAddress) {
@@ -76,7 +76,7 @@ describe("Accounts", async() => {
       unlocked_accounts: [index]
     };
 
-    const { accounts, web3 } = await preloadWeb3(options);
+    const { accounts, web3 } = await getWeb3(options);
 
     accounts.forEach(async(account) => {
       if (account === accounts[index]) {
@@ -109,7 +109,7 @@ describe("Accounts", async() => {
       unlocked_accounts: [0, badAddress]
     };
 
-    const { web3 } = await preloadWeb3(options);
+    const { web3 } = await getWeb3(options);
 
     // Set up: give second address some ether
     await web3.eth.sendTransaction({
@@ -149,7 +149,7 @@ describe("Accounts", async() => {
       unlocked_accounts: [0, badAddress]
     };
 
-    const { web3 } = await preloadWeb3(options);
+    const { web3 } = await getWeb3(options);
 
     try {
       await web3.eth.sign("some data", badAddress);
@@ -164,7 +164,7 @@ describe("Accounts", async() => {
       accounts: [{ balance: "0x12" }, { balance: "0x13" }]
     };
 
-    const { accounts } = await preloadWeb3(options);
+    const { accounts } = await getWeb3(options);
 
     assert.strictEqual(accounts.length, 2, "The number of accounts created should be 2");
   });
@@ -174,7 +174,7 @@ describe("Accounts", async() => {
       total_accounts: 7
     };
 
-    const { accounts } = await preloadWeb3(options);
+    const { accounts } = await getWeb3(options);
 
     assert.strictEqual(accounts.length, 7, "The number of accounts created should be 7");
   });
@@ -184,7 +184,7 @@ describe("Accounts", async() => {
       default_balance_ether: 1.23456
     };
 
-    const { accounts, web3 } = await preloadWeb3(options);
+    const { accounts, web3 } = await getWeb3(options);
 
     accounts.forEach(async(account) => {
       const balance = await web3.eth.getBalance(account);

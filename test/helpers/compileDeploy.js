@@ -6,7 +6,7 @@ const { readFileSync } = require("fs");
  * @param {String} mainContractName  Name of the main contract (without .sol extension)
  * @param {Array|String} contractFileNames List of imported contracts
  * @param {String} contractPath  Path to contracts directory
- * @returns {Object} context: abi, bytecode
+ * @returns {Object} context: abi, bytecode, sources
  */
 async function compile(mainContractName, contractFileNames = [], contractPath) {
   const selectedContracts = [mainContractName].concat(contractFileNames);
@@ -27,7 +27,8 @@ async function compile(mainContractName, contractFileNames = [], contractPath) {
 
   return {
     abi,
-    bytecode
+    bytecode,
+    sources
   };
 }
 
@@ -38,7 +39,7 @@ async function compile(mainContractName, contractFileNames = [], contractPath) {
  * @param {Object} web3 Web3 interface
  * @returns {Object} context: abi, accounts, bytecode, contract, instance
  */
-async function deploy(abi, bytecode, web3) {
+async function deploy(abi, bytecode, sources, web3) {
   const contract = new web3.eth.Contract(abi);
 
   const accounts = await web3.eth.getAccounts();
@@ -50,7 +51,8 @@ async function deploy(abi, bytecode, web3) {
     accounts,
     bytecode,
     contract,
-    instance
+    instance,
+    sources
   };
 }
 
@@ -63,8 +65,8 @@ async function deploy(abi, bytecode, web3) {
  * @returns {Object} context: abi, accounts, bytecode, contract, instance, sources
  */
 async function compileAndDeploy(mainContractName, contractFileNames = [], contractPath, web3) {
-  const { abi, bytecode } = await compile(mainContractName, contractFileNames, contractPath);
-  return deploy(abi, bytecode, web3);
+  const { abi, bytecode, sources } = await compile(mainContractName, contractFileNames, contractPath);
+  return deploy(abi, bytecode, sources, web3);
 }
 
 module.exports = {
