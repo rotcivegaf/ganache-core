@@ -1,24 +1,25 @@
-var Web3 = require("web3");
-var assert = require("assert");
-var Ganache = require(process.env.TEST_BUILD
+// const { setUp } = require("./helpers/pretestSetup");
+let Web3 = require("web3");
+let assert = require("assert");
+let Ganache = require(process.env.TEST_BUILD
   ? "../build/ganache.core." + process.env.TEST_BUILD + ".js"
   : "../index.js");
-var fs = require("fs");
-var solc = require("solc");
-var async = require("async");
-var to = require("../lib/utils/to.js");
+let fs = require("fs");
+let solc = require("solc");
+// let async = require("async");
+let to = require("../lib/utils/to.js");
 
 // Thanks solc. At least this works!
 // This removes solc's overzealous uncaughtException event handler.
 process.removeAllListeners("uncaughtException");
 
-var source = fs.readFileSync("./test/contracts/examples/Example.sol", { encoding: "utf8" });
-var result = solc.compile(source, 1);
+let source = fs.readFileSync("./test/contracts/examples/Example.sol", { encoding: "utf8" });
+let result = solc.compile(source, 1);
 
 // Note: Certain properties of the following contract data are hardcoded to
 // maintain repeatable tests. If you significantly change the solidity code,
 // make sure to update the resulting contract data with the correct values.
-var contract = {
+let contract = {
   solidity: source,
   abi: result.contracts[":Example"].interface,
   binary: "0x" + result.contracts[":Example"].bytecode,
@@ -38,111 +39,59 @@ var contract = {
   }
 };
 
-describe("Block Tags", function() {
-  var accounts;
-  var web3 = new Web3(Ganache.provider());
-  var contractAddress;
+describe("Block Tags", () => {
+  let accounts;
+  let web3 = new Web3(Ganache.provider());
+  let contractAddress;
 
-  var initialBlockNumber;
-  var initial = {};
+  let initialBlockNumber;
+  let initial = {};
 
-  before("Gather accounts", function(done) {
-    web3.eth.getAccounts(function(err, accs) {
-      if (err) {
-        return done(err);
-      }
-      accounts = accs;
-      done();
+  before("Gather accounts", async() => {
+    accounts = await web3.eth.getAccounts();
+  });
+
+  before("Get initial block number", async() => {
+    const blockNumber = await web3.eth.getBlockNumber();
+    initialBlockNumber = to.number(blockNumber);
+  });
+
+  before("Get initial balance and nonce", async() => {
+    const balance = await web3.eth.getBalance(accounts[0]);
+    const nonce = await web3.eth.getTransactionCount(accounts[0]);
+    Object.assign(initial, {
+      balance,
+      nonce
     });
   });
 
-  before("Get initial block number", function(done) {
-    web3.eth.getBlockNumber(function(err, n) {
-      if (err) {
-        return done(err);
-      }
-      initialBlockNumber = to.number(n);
-      done();
+  before("Make transaction that changes balance, nonce and code", async() => {
+    const tx = await web3.eth.sendTransaction({
+      from: accounts[0],
+      data: contract.binary,
+      gas: 3141592
     });
+    contractAddress = tx.contractAddress;
   });
 
-  before("Get initial balance and nonce", function(done) {
-    async.parallel(
-      {
-        balance: web3.eth.getBalance.bind(web3.eth, accounts[0]),
-        nonce: web3.eth.getTransactionCount.bind(web3.eth, accounts[0])
-      },
-      function(err, result) {
-        if (err) {
-          return done(err);
-        }
-        initial = result;
-        initial.nonce = to.number(initial.nonce);
-        done();
-      }
-    );
+  it("should return the initial nonce at the previous block number", async() => {
+    let nonce = await web3.eth.getTransactionCount(accounts[0], initialBlockNumber);
+    assert.strictEqual(nonce, initial.nonce);
+
+    // Check that the nonce incremented with the block number, just to be sure.
+    nonce = await web3.eth.getTransactionCount(accounts[0], initialBlockNumber + 1);
+    assert.strictEqual(nonce, initial.nonce + 1);
   });
 
-  before("Make transaction that changes balance, nonce and code", function(done) {
-    web3.eth.sendTransaction(
-      {
-        from: accounts[0],
-        data: contract.binary,
-        gas: 3141592
-      },
-      function(err, tx) {
-        if (err) {
-          return done(err);
-        }
+  it("should return the initial balance at the previous block number", async() => {
+    let balance = await web3.eth.getBalance(accounts[0], initialBlockNumber);
+    assert.strictEqual(balance, initial.balance);
 
-        web3.eth.getTransactionReceipt(tx, function(err, receipt) {
-          if (err) {
-            return done(err);
-          }
-
-          contractAddress = receipt.contractAddress;
-          done();
-        });
-      }
-    );
-  });
-
-  it("should return the initial nonce at the previous block number", function(done) {
-    web3.eth.getTransactionCount(accounts[0], initialBlockNumber, function(err, nonce) {
-      if (err) {
-        return done(err);
-      }
-      assert.strictEqual(nonce, initial.nonce);
-
-      // Check that the nonce incremented with the block number, just to be sure.
-      web3.eth.getTransactionCount(accounts[0], initialBlockNumber + 1, function(err, nonce) {
-        if (err) {
-          return done(err);
-        }
-        assert.strictEqual(nonce, initial.nonce + 1);
-        done();
-      });
-    });
-  });
-
-  it("should return the initial balance at the previous block number", function(done) {
-    web3.eth.getBalance(accounts[0], initialBlockNumber, function(err, balance) {
-      if (err) {
-        return done(err);
-      }
-      assert.strictEqual(balance, initial.balance);
-
-      // Check that the balance incremented with the block number, just to be sure.
-      web3.eth.getBalance(accounts[0], initialBlockNumber + 1, function(err, balance) {
-        if (err) {
-          return done(err);
-        }
-        var initialBalanceInEther = parseFloat(web3.utils.fromWei(initial.balance, "ether"));
-        var balanceInEther = parseFloat(web3.utils.fromWei(balance, "ether"));
-        assert(balanceInEther < initialBalanceInEther);
-        done();
-      });
-    });
+    // Check that the balance incremented with the block number, just to be sure.
+    balance = await web3.eth.getBalance(accounts[0], initialBlockNumber + 1);
+    let initialBalanceInEther = parseFloat(web3.utils.fromWei(initial.balance, "ether"));
+    let balanceInEther = parseFloat(web3.utils.fromWei(balance, "ether"));
+    assert(balanceInEther < initialBalanceInEther);
   });
 
   it("should return the no code at the previous block number", function(done) {
